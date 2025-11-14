@@ -1,41 +1,71 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 
-const TDT_CHANNELS = [
-  { multiplex: 14, freq: 473, name: "MX14 (Caracol)" },
-  { multiplex: 15, freq: 479, name: "MX15 (RCN)" },
-  { multiplex: 16, freq: 485, name: "MX16 (Señal Colombia)" },
-  { multiplex: 22, freq: 521, name: "MX22 (Citytv)" },
-  { multiplex: 23, freq: 527, name: "MX23 (Canal Capital)" },
-];
+// Presets de frecuencias
+const FREQUENCY_PRESETS = {
+  "FM RADIO": [{ name: "FM Radio", start: 88, stop: 108, rbw: 50 }],
+  RADIOCOMUNICACIONES: [
+    { name: "Banda Aérea Comercial", start: 118, stop: 137, rbw: 25 },
+    { name: "Banda Aérea Privada", start: 137, stop: 144, rbw: 25 },
+    { name: "VHF Marino", start: 156, stop: 174, rbw: 25 },
+    { name: "PMR446", start: 446, stop: 447, rbw: 50 },
+  ],
+  AVIACIÓN: [
+    { name: "ADS-B (1090 MHz)", start: 1090, stop: 1090.5, rbw: 25 },
+    { name: "Mode S", start: 1030, stop: 1090, rbw: 100 },
+  ],
+  "BANDA CIVIL": [
+    { name: "GSM-900 DL", start: 935, stop: 960, rbw: 100 },
+    { name: "GSM-1800 DL", start: 1805, stop: 1880, rbw: 100 },
+    { name: "4G LTE", start: 800, stop: 2600, rbw: 1000 },
+  ],
+  "TV DIGITAL": [
+    { name: "TDT Multiplex 14", start: 473, stop: 481, rbw: 50 },
+    { name: "TDT Multiplex 15", start: 479, stop: 487, rbw: 50 },
+    { name: "TDT Multiplex 22", start: 521, stop: 529, rbw: 50 },
+  ],
+  "ISM BANDS": [
+    { name: "WiFi 2.4 GHz", start: 2400, stop: 2500, rbw: 1000 },
+    { name: "Bluetooth", start: 2402, stop: 2480, rbw: 100 },
+    { name: "ISM 915 MHz", start: 915, stop: 928, rbw: 100 },
+  ],
+};
 
 function App() {
   const [deviceInfo, setDeviceInfo] = useState(null);
   const [carriers, setCarriers] = useState([]);
+  const [autoScan, setAutoScan] = useState(false);
+  const [scanInterval, setScanInterval] = useState(2);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/device-info")
       .then((r) => r.json())
-      .then((data) => {
-        console.log("Device info:", data);
-        setDeviceInfo(data);
-      })
-      .catch((e) => console.error("Error:", e));
+      .then((data) => setDeviceInfo(data))
+      .catch((e) => console.error(e));
   }, []);
 
-  const handleAddChannel = (ch) => {
-    console.log("Agregando canal:", ch);
+  const addFrequency = (preset) => {
     setCarriers([
       ...carriers,
       {
         id: Date.now(),
-        name: ch.name,
-        start_freq: ch.freq * 1e6,
-        stop_freq: (ch.freq + 8) * 1e6,
-        rbw: 50000,
+        name: preset.name,
+        start_freq: preset.start * 1e6,
+        stop_freq: preset.stop * 1e6,
+        rbw: preset.rbw * 1000,
         gain: "auto",
+        autoScan: false,
+        waterfall: [],
       },
     ]);
+  };
+
+  const removeCarrier = (id) => {
+    setCarriers(carriers.filter((c) => c.id !== id));
+  };
+
+  const updateCarrier = (id, updates) => {
+    setCarriers(carriers.map((c) => (c.id === id ? { ...c, ...updates } : c)));
   };
 
   return (
@@ -54,26 +84,49 @@ function App() {
 
       <div className="main-container">
         <aside className="sidebar">
-          <h3>⚙️ Controles</h3>
-          <button
-            onClick={() => handleAddChannel({ freq: 100, name: "Nueva" })}
-            className="btn btn-primary"
-          >
-            + NUEVA PORTADORA
-          </button>
+          <h3>⚙️ Escaneo Automático</h3>
+          <label className="auto-scan-label">
+            <input
+              type="checkbox"
+              checked={autoScan}
+              onChange={(e) => setAutoScan(e.target.checked)}
+            />
+            Activar
+          </label>
+
+          {autoScan && (
+            <div className="interval-control">
+              <label>Intervalo (seg):</label>
+              <input
+                type="number"
+                min="0.5"
+                max="10"
+                step="0.5"
+                value={scanInterval}
+                onChange={(e) => setScanInterval(parseFloat(e.target.value))}
+                className="interval-input"
+              />
+            </div>
+          )}
 
           <hr />
 
-          <h3>📺 Canales TDT Colombia</h3>
-          <div className="tdt-buttons">
-            {TDT_CHANNELS.map((ch) => (
-              <button
-                key={ch.multiplex}
-                onClick={() => handleAddChannel(ch)}
-                className="btn btn-tdt"
-              >
-                {ch.multiplex}
-              </button>
+          <h3>📻 Presets de Frecuencia</h3>
+          <div className="presets-container">
+            {Object.entries(FREQUENCY_PRESETS).map(([category, presets]) => (
+              <div key={category} className="preset-category">
+                <h4>{category}</h4>
+                {presets.map((preset, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => addFrequency(preset)}
+                    className="btn btn-preset"
+                    title={`${preset.start} - ${preset.stop} MHz`}
+                  >
+                    {preset.name}
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
 
@@ -85,8 +138,8 @@ function App() {
               Portadoras: <strong>{carriers.length}</strong>
             </p>
             <p>
-              En streaming:{" "}
-              <strong>{carriers.filter((c) => c.streaming).length}</strong>
+              En escaneo:{" "}
+              <strong>{carriers.filter((c) => c.autoScan).length}</strong>
             </p>
           </div>
 
@@ -106,7 +159,9 @@ function App() {
             <div className="empty-state">
               <div className="empty-icon">📭</div>
               <h2>No hay portadoras activas</h2>
-              <p>Selecciona un canal TDT o crea una portadora manual</p>
+              <p>
+                Selecciona un preset de frecuencia o crea una portadora manual
+              </p>
             </div>
           ) : (
             <div className="carrier-grid">
@@ -114,9 +169,10 @@ function App() {
                 <SpectrumCard
                   key={c.id}
                   carrier={c}
-                  onRemove={() =>
-                    setCarriers(carriers.filter((x) => x.id !== c.id))
-                  }
+                  onRemove={() => removeCarrier(c.id)}
+                  onUpdate={(updates) => updateCarrier(c.id, updates)}
+                  autoScan={autoScan}
+                  scanInterval={scanInterval}
                 />
               ))}
             </div>
@@ -127,15 +183,60 @@ function App() {
   );
 }
 
-function SpectrumCard({ carrier, onRemove }) {
+function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
   const canvasRef = useRef(null);
+  const waterfallCanvasRef = useRef(null);
   const [scanning, setScanning] = useState(false);
   const [lastData, setLastData] = useState(null);
+  const scanTimeoutRef = useRef(null);
+
+  // Escaneo automático
+  useEffect(() => {
+    if (!autoScan) return;
+
+    const performScan = async () => {
+      setScanning(true);
+      try {
+        const res = await fetch("http://localhost:5000/api/scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            start_freq: carrier.start_freq,
+            stop_freq: carrier.stop_freq,
+            rbw: carrier.rbw,
+            num_averages: 1,
+          }),
+        });
+        const data = await res.json();
+        setLastData(data);
+
+        // Agregar al waterfall
+        onUpdate({
+          waterfall: [...(carrier.waterfall || []), data.power].slice(-100),
+        });
+      } catch (e) {
+        console.error("Error:", e);
+      } finally {
+        setScanning(false);
+      }
+    };
+
+    performScan();
+    scanTimeoutRef.current = setInterval(performScan, scanInterval * 1000);
+
+    return () => clearInterval(scanTimeoutRef.current);
+  }, [
+    autoScan,
+    carrier.start_freq,
+    carrier.stop_freq,
+    carrier.rbw,
+    scanInterval,
+    onUpdate,
+  ]);
 
   const handleScan = async () => {
     setScanning(true);
     try {
-      console.log("Escaneando:", carrier.name);
       const res = await fetch("http://localhost:5000/api/scan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -147,30 +248,33 @@ function SpectrumCard({ carrier, onRemove }) {
         }),
       });
       const data = await res.json();
-      console.log("Datos recibidos:", data);
       setLastData(data);
-      drawSpectrum(data);
+      onUpdate({
+        waterfall: [...(carrier.waterfall || []), data.power].slice(-100),
+      });
     } catch (e) {
-      console.error("Error escaneo:", e);
+      console.error("Error:", e);
     } finally {
       setScanning(false);
     }
   };
 
-  const drawSpectrum = (data) => {
-    if (!data || !data.power || data.power.length === 0) {
-      console.error("Sin datos para dibujar");
-      return;
-    }
+  // Dibujar espectro
+  useEffect(() => {
+    if (!lastData) return;
+    drawSpectrum();
+  }, [lastData]);
+
+  // Dibujar waterfall
+  useEffect(() => {
+    if (!carrier.waterfall || carrier.waterfall.length === 0) return;
+    drawWaterfall();
+  }, [carrier.waterfall]);
+
+  const drawSpectrum = () => {
+    if (!canvasRef.current || !lastData) return;
 
     const canvas = canvasRef.current;
-    if (!canvas) {
-      console.error("Canvas no encontrado");
-      return;
-    }
-
-    console.log("Dibujando en canvas...");
-
     const ctx = canvas.getContext("2d");
     const w = canvas.offsetWidth;
     const h = canvas.offsetHeight;
@@ -178,12 +282,12 @@ function SpectrumCard({ carrier, onRemove }) {
     canvas.width = w;
     canvas.height = h;
 
-    const power = data.power;
+    const power = lastData.power;
     const minP = Math.min(...power);
     const maxP = Math.max(...power);
     const range = maxP - minP || 1;
 
-    // Fondo negro
+    // Fondo
     ctx.fillStyle = "#0a0a0a";
     ctx.fillRect(0, 0, w, h);
 
@@ -191,14 +295,13 @@ function SpectrumCard({ carrier, onRemove }) {
     ctx.strokeStyle = "#333";
     ctx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
-      const y = (h / 4) * i;
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(w, y);
+      ctx.moveTo(0, (h / 4) * i);
+      ctx.lineTo(w, (h / 4) * i);
       ctx.stroke();
     }
 
-    // Gráfico verde
+    // Gráfico
     ctx.strokeStyle = "#00ff00";
     ctx.lineWidth = 2;
     ctx.shadowColor = "rgba(0, 255, 0, 0.5)";
@@ -214,22 +317,58 @@ function SpectrumCard({ carrier, onRemove }) {
     });
     ctx.stroke();
 
-    // Información
+    // Texto
     ctx.shadowColor = "transparent";
     ctx.fillStyle = "#00ff00";
-    ctx.font = "bold 14px monospace";
-    ctx.fillText(`Max: ${data.max_power.toFixed(1)} dBm`, 10, 25);
-    ctx.fillText(`Freq: ${(data.max_freq / 1e6).toFixed(3)} MHz`, 10, 45);
-
-    console.log("Gráfico dibujado exitosamente");
+    ctx.font = "bold 12px monospace";
+    ctx.fillText(`Max: ${lastData.max_power.toFixed(1)} dBm`, 10, 20);
+    ctx.fillText(`${(lastData.max_freq / 1e6).toFixed(3)} MHz`, 10, 35);
   };
 
-  // Redibujar cuando cambia lastData
-  useEffect(() => {
-    if (lastData) {
-      drawSpectrum(lastData);
-    }
-  }, [lastData]);
+  const drawWaterfall = () => {
+    if (!waterfallCanvasRef.current) return;
+
+    const canvas = waterfallCanvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const w = canvas.offsetWidth;
+    const h = canvas.offsetHeight;
+
+    canvas.width = w;
+    canvas.height = h;
+
+    if (!carrier.waterfall || carrier.waterfall.length === 0) return;
+
+    const pixelPerRow = h / carrier.waterfall.length;
+
+    carrier.waterfall.forEach((powerData, rowIdx) => {
+      const minP = Math.min(...powerData);
+      const maxP = Math.max(...powerData);
+      const range = maxP - minP || 1;
+
+      powerData.forEach((p, colIdx) => {
+        const x = (colIdx / (powerData.length - 1)) * w;
+        const y = rowIdx * pixelPerRow;
+
+        // Colorizar por potencia
+        const normalized = (p - minP) / range;
+        let hue = normalized * 120; // Verde a rojo
+        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+        ctx.fillRect(x, y, w / powerData.length, pixelPerRow);
+      });
+    });
+  };
+
+  const handleGainChange = (e) => {
+    const gain = e.target.value;
+    onUpdate({ gain });
+
+    // Enviar al backend
+    fetch("http://localhost:5000/api/set-gain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gain }),
+    }).catch((err) => console.error("Error setting gain:", err));
+  };
 
   return (
     <div className="carrier-tile">
@@ -246,45 +385,67 @@ function SpectrumCard({ carrier, onRemove }) {
         </button>
       </div>
 
-      <div className="tile-info">
-        {lastData && (
-          <>
-            <p>
-              Max:{" "}
-              <span className="power-val">
-                {lastData.max_power.toFixed(2)} dBm
-              </span>
-            </p>
-            <p>
-              Freq:{" "}
-              <span className="freq-val">
-                {(lastData.max_freq / 1e6).toFixed(3)} MHz
-              </span>
-            </p>
-            <p>
-              Ruido: <span>{lastData.noise_floor.toFixed(2)} dBm</span>
-            </p>
-          </>
-        )}
+      <div className="tile-controls">
+        <label className="gain-control">
+          <span>Ganancia:</span>
+          <select
+            value={carrier.gain}
+            onChange={handleGainChange}
+            className="gain-select"
+          >
+            <option value="auto">Auto</option>
+            <option value="0">0 dB</option>
+            <option value="10">10 dB</option>
+            <option value="20">20 dB</option>
+            <option value="30">30 dB</option>
+            <option value="40">40 dB</option>
+          </select>
+        </label>
+
+        <label className="auto-label">
+          <input
+            type="checkbox"
+            checked={carrier.autoScan}
+            onChange={(e) => onUpdate({ autoScan: e.target.checked })}
+          />
+          Auto
+        </label>
       </div>
 
-      <canvas
-        ref={canvasRef}
-        className="tile-chart"
-        style={{
-          display: "block",
-          width: "100%",
-          height: "200px",
-          backgroundColor: "#0a0a0a",
-        }}
-      />
+      {lastData && (
+        <div className="tile-info">
+          <p>
+            Max:{" "}
+            <span className="power-val">
+              {lastData.max_power.toFixed(2)} dBm
+            </span>
+          </p>
+          <p>
+            Freq:{" "}
+            <span className="freq-val">
+              {(lastData.max_freq / 1e6).toFixed(3)} MHz
+            </span>
+          </p>
+          <p>Ruido: {lastData.noise_floor.toFixed(2)} dBm</p>
+        </div>
+      )}
+
+      <div className="canvas-container">
+        <h4>Espectro</h4>
+        <canvas ref={canvasRef} className="tile-chart" />
+      </div>
+
+      <div className="canvas-container">
+        <h4>Waterfall (Historial)</h4>
+        <canvas ref={waterfallCanvasRef} className="waterfall-chart" />
+      </div>
 
       <button
         onClick={handleScan}
         disabled={scanning}
         className={`btn btn-scan ${scanning ? "scanning" : ""}`}
       >
-        {scanning ? "🔄 Escaneando..." : "📊 ESCANEAR"}
+        {scanning ? "🔄 Escaneando..." : "📊 ESCANEAR AHORA"}
       </button>
     </div>
   );
