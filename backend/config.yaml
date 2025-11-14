@@ -1,0 +1,26 @@
+﻿app:
+  name: "RTL-SDR Multiview Analyzer"
+  version: "0.1.0"
+  debug: true
+  host: "127.0.0.1"
+  port: 5000
+  cors_origins: "*"
+
+sdr:
+  sample_rate: 2400000
+  center_freq: 1000000000
+  gain: "auto"
+  freq_min: 24000000
+  freq_max: 1766000000
+  default_rbw: 100000
+  default_num_averages: 5
+  default_fft_size: 4096
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/app.log"
+
+database:
+  type: "sqlite"
+  path: "data/measurements.db"
