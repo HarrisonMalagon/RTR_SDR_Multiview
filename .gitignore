@@ -1,0 +1,32 @@
+﻿# Entornos virtuales
+backend/venv/
+backend/lib/
+frontend/node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.log
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+backend/dist/
+frontend/build/
+
+# Datos
+backend/logs/
+backend/data/
