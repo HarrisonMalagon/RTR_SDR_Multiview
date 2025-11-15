@@ -38507,3 +38507,261 @@ NameError: name 'Flsak' is not defined. Did you mean: 'Flask'?
 2025-11-15 12:22:17 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:22:17] "GET /api/device-info HTTP/1.1" 200 -
 2025-11-15 12:22:22 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:22:22] "GET /api/device-info HTTP/1.1" 200 -
 2025-11-15 12:22:27 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:22:27] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:23:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:23:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:24:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:24:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:25:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:25:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:03 - app.services.sdr_wrapper - INFO - Dispositivo cerrado
+2025-11-15 12:26:04 - root - INFO - ======================================================================
+2025-11-15 12:26:04 - root - INFO - Iniciando RTL-SDR Multiview Analyzer
+2025-11-15 12:26:04 - root - INFO - ======================================================================
+2025-11-15 12:26:04 - root - INFO - Inicializando SDR Scanner...
+2025-11-15 12:26:04 - app.services.sdr_wrapper - INFO - [OK] RTL-SDR REAL CONECTADO: 5
+2025-11-15 12:26:04 - root - INFO -    Device: RTL-SDR (DISPOSITIVO REAL)
+2025-11-15 12:26:04 - root - INFO -    Tuner: 5
+2025-11-15 12:26:04 - root - INFO -    Real: True
+2025-11-15 12:26:04 - root - INFO - Creando aplicacion Flask...
+2025-11-15 12:26:04 - app - INFO - Aplicación Flask creada
+2025-11-15 12:26:04 - app.services.audio_handler - INFO - AudioHandler inicializado
+2025-11-15 12:26:04 - app.websocket_handler - INFO - AudioHandler inicializado correctamente
+2025-11-15 12:26:04 - app.websocket_handler - INFO - Heartbeat monitor iniciado
+2025-11-15 12:26:04 - root - INFO - ======================================================================
+2025-11-15 12:26:04 - root - INFO - Servidor escuchando en http://127.0.0.1:5000
+2025-11-15 12:26:04 - root - INFO - Modo debug: True
+2025-11-15 12:26:04 - root - INFO - Frontend: http://localhost:5173
+2025-11-15 12:26:04 - root - INFO - ======================================================================
+2025-11-15 12:26:04 - root - INFO - Presiona CTRL+C para detener
+
+2025-11-15 12:26:04 - werkzeug - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-11-15 12:26:04 - werkzeug - INFO - [33mPress CTRL+C to quit[0m
+2025-11-15 12:26:12 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:12] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:13 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:13] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:14 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:14] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:17 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:17] "OPTIONS /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:17 - app.services.sdr_scanner - INFO - Escaneo: 78.0-118.0 MHz | Portadoras: 5 | Real: True
+2025-11-15 12:26:17 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:17] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:18 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:18 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:18] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:19 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:19] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:24 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:24] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:28 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:28] "OPTIONS /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:28 - app.services.sdr_scanner - INFO - Escaneo: 78.0-118.0 MHz | Portadoras: 5 | Real: True
+2025-11-15 12:26:28 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:28] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:28 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:28 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:28] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:28 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:28 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:28] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:29 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:29 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:29] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:29 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:29] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:29 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:29 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:29] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:29 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:29 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:29] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:29 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:29 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:29] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:29 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:29 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:29] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:29 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:29 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:29] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:29 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:29 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:29] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:29 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:29 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:29] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Escaneo: 78.0-118.0 MHz | Portadoras: 5 | Real: True
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:30 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:30 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:30] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:31 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:31 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:31] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:31 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:31 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:31] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:31 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:31 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:31] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:31 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:31 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:31] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:31 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:31 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:31] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:31 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:31 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:31] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:31 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:31 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:31] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:31 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:31 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:31] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:31 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:31 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:31] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:32 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:32] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:32 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:32] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:32 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:32] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:32 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:32] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:32 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:32] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:32 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:32] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:32 - app.services.sdr_scanner - INFO - Escaneo: 78.0-118.0 MHz | Portadoras: 5 | Real: True
+2025-11-15 12:26:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:32] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:32 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:32] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:32 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:32] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:33 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:33 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:33] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:33 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:33 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:33] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:33 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:33] "OPTIONS /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:33 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:33] "OPTIONS /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:33 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:33 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:33] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:33 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:33 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:33] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:33 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:33 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:33] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:33 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:33 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:33] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:33 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:33 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:33] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.api - ERROR - Error en API scan: Ya hay un escaneo en progreso
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "[35m[1mPOST /api/scan HTTP/1.1[0m" 500 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Escaneo: 78.0-118.0 MHz | Portadoras: 5 | Real: True
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:34 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:34 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:34] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:35 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:35 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:35] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:35 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:35 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:35] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:35 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:35 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:35] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:35 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:35 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:35] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:35 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:35 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:35] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:35 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:35 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:35] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:35 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:35 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:35] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:35 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:35 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:35] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:35 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:35 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:35] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:36 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:36 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:36] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:36 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:36 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:36] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:36 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:36 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:36] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:36 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:36 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:36] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:36 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:36 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:36] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:36 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:36 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:36] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:36 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:36 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:36] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:36 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:36 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:36] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:36 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:36 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:36] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:37 - app.services.sdr_scanner - INFO - Escaneo: 78.0-118.0 MHz | Portadoras: 5 | Real: True
+2025-11-15 12:26:37 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:37] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:37 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:37 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:37] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:37 - app.services.sdr_scanner - INFO - Usando resultado en cache
+2025-11-15 12:26:37 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:37] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:38 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:38] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:40 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:40] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:40 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:40] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:41 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:41] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:41 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:41] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:46 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:46] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:51 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:51] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:26:54 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:54] "OPTIONS /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:55 - app.services.sdr_scanner - INFO - Escaneo: 100.4-103.4 MHz | Portadoras: 5 | Real: True
+2025-11-15 12:26:55 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:55] "POST /api/scan HTTP/1.1" 200 -
+2025-11-15 12:26:56 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:26:56] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:01 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:01] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:06 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:06] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:11 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:11] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:17 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:17] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:22 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:22] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:27 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:27] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:32 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:32] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:37 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:37] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:42 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:42] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:47 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:47] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:52 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:52] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:27:57 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:27:57] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:28:02 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:28:02] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:28:07 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:28:07] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:28:12 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:28:12] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:29:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:29:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:30:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:30:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:31:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:31:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:32:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:32:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:33:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:33:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:34:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:34:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:35:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:35:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:36:16 - werkzeug - INFO - 127.0.0.1 - - [15/Nov/2025 12:36:16] "GET /api/device-info HTTP/1.1" 200 -
+2025-11-15 12:37:12 - app.services.sdr_wrapper - INFO - Dispositivo cerrado
+2025-11-15 12:37:13 - root - INFO - ======================================================================
+2025-11-15 12:37:13 - root - INFO - Iniciando RTL-SDR Multiview Analyzer
+2025-11-15 12:37:13 - root - INFO - ======================================================================
+2025-11-15 12:37:13 - root - INFO - Inicializando SDR Scanner...
+2025-11-15 12:37:14 - app.services.sdr_wrapper - INFO - [OK] RTL-SDR REAL CONECTADO: 5
+2025-11-15 12:37:14 - root - INFO -    Device: RTL-SDR (DISPOSITIVO REAL)
+2025-11-15 12:37:14 - root - INFO -    Tuner: 5
+2025-11-15 12:37:14 - root - INFO -    Real: True
+2025-11-15 12:37:14 - root - INFO - Inicializando SDR Manager...
+2025-11-15 12:37:14 - app.services.sdr_manager - INFO - Captura iniciada @ 98.0 MHz
+2025-11-15 12:37:14 - root - INFO - Creando aplicacion Flask...
+2025-11-15 12:37:14 - app - INFO - Aplicación Flask creada
+2025-11-15 12:37:14 - app.services.audio_handler - INFO - AudioHandler inicializado
+2025-11-15 12:37:14 - root - ERROR - Error fatal: name '_audio_demodulator' is assigned to before global declaration (websocket_handler.py, line 28)
+Traceback (most recent call last):
+  File "S:\SDRWEB\rtl-sdr-multiview\backend\main.py", line 63, in main
+    from app.websocket_handler import init_socketio
+  File "S:\SDRWEB\rtl-sdr-multiview\backend\app\websocket_handler.py", line 28
+    global _audio_demodulator
+    ^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: name '_audio_demodulator' is assigned to before global declaration
+2025-11-15 12:37:14 - app.services.sdr_manager - INFO - Captura detenida
+2025-11-15 12:37:14 - app.services.sdr_wrapper - INFO - Dispositivo cerrado

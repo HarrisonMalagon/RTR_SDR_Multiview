@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from app import create_app
 from app.services.sdr_scanner import SDRScanner
+from app.services.sdr_manager import SDRManager
 from app.api import set_scanner
 from utils.logger import setup_logging
 
@@ -27,6 +28,7 @@ def main():
     socketio = None
     app = None
     scanner = None
+    sdr_manager = None
     
     try:
         logger.info("=" * 70)
@@ -41,6 +43,11 @@ def main():
         logger.info(f"   Tuner: {device_info.get('tuner', 'Unknown')}")
         logger.info(f"   Real: {device_info.get('is_real', False)}")
         
+        # Crear SDR Manager para captura desacoplada
+        logger.info("Inicializando SDR Manager...")
+        sdr_manager = SDRManager(scanner.wrapper, ring_buffer_size=524288)
+        sdr_manager.start_capture(center_freq=98e6)  # FM Radio por defecto
+        
         # Crear aplicación Flask
         logger.info("Creando aplicacion Flask...")
         app, socketio = create_app()
@@ -54,7 +61,7 @@ def main():
         
         # Inicializar WebSocket
         from app.websocket_handler import init_socketio
-        init_socketio(socketio, scanner, audio_handler)
+        init_socketio(socketio, scanner, sdr_manager, audio_handler)
         
         # Configuración del servidor
         host = os.getenv("FLASK_HOST", "127.0.0.1")
@@ -80,6 +87,8 @@ def main():
         logger.error(f"Error fatal: {e}", exc_info=True)
         sys.exit(1)
     finally:
+        if sdr_manager:
+            sdr_manager.stop_capture()
         if scanner:
             scanner.close()
 

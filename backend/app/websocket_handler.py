@@ -17,16 +17,18 @@ _heartbeat_interval = 5
 _heartbeat_timeout = 15
 
 
-def init_socketio(socketio, scanner, audio_handler=None):
-    """Inicializa WebSocket con el scanner y audio"""
-    global _audio_demodulator
+def init_socketio(socketio, scanner, sdr_manager, audio_handler=None):
+    """Inicializa WebSocket con scanner, sdr_manager y audio"""
+    global _audio_demodulator, _sdr_manager, _streaming_active, _client_heartbeat
 
+    _sdr_manager = sdr_manager
     _audio_demodulator = audio_handler
 
     if _audio_demodulator:
         logger.info("AudioHandler inicializado correctamente")
     else:
-        logger.warning("AudioHandler no disponible")
+        logger.warning("AudioHandler no disponible")    
+
 
     @socketio.on("connect")
     def handle_connect():
@@ -234,11 +236,13 @@ def init_socketio(socketio, scanner, audio_handler=None):
                             span_freq = stop_freq - start_freq
                             
                             # Capturar muestras IQ directas
-                            iq_samples = scanner.wrapper.get_iq_samples(
-                                int(center_freq), 
-                                int(span_freq),
-                                num_samples=8192
-                            )
+                            # iq_samples = scanner.wrapper.get_iq_samples(
+                            #     int(center_freq), 
+                            #     int(span_freq),
+                            #     num_samples=8192
+                            # )
+                            
+                            iq_samples = sdr_manager.read_iq_samples(8192)
                             
                             if iq_samples is None:
                                 logger.warning("No se pudieron obtener muestras IQ")
