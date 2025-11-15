@@ -81,7 +81,9 @@ export const useAudioPlayer = () => {
         source.connect(gainNodeRef.current);
         source.start(audioContext.currentTime);
 
-        console.log(`▶ Reproduciendo: ${float32Array.length} samples @ ${sampleRate}Hz`);
+        console.log(
+          `▶ Reproduciendo: ${float32Array.length} samples @ ${sampleRate}Hz`
+        );
       } catch (e) {
         console.error("Error reproduciendo audio:", e);
       }

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
-import { useAudioPlayer } from "./hooks/useAudioPlayer";
 
 // Paletas de colores para waterfall
 const COLOR_PALETTES = {
@@ -48,11 +47,9 @@ const downsampleData = (data, targetLength = 512) => {
   return downsampled.slice(0, targetLength);
 };
 
-// Obtener color según paleta
+// Funciones de color
 const getColorFromValue = (normalized, palette = "default") => {
-  // normalized: 0-1
   normalized = Math.max(0, Math.min(1, normalized));
-
   switch (palette) {
     case "viridis":
       return viridisColor(normalized);
@@ -68,7 +65,7 @@ const getColorFromValue = (normalized, palette = "default") => {
 };
 
 const defaultColor = (v) => {
-  const h = v * 120; // 0-120 (verde a rojo)
+  const h = v * 120;
   return hslToRgb(h / 360, 1, 0.5);
 };
 
@@ -184,6 +181,7 @@ function App() {
       span_freq: preset.span * 1e6,
       rbw: preset.rbw * 1000,
       gain: "auto",
+      audioMode: "fm",
       autoScan: autoScan,
       waterfall: [],
     };
@@ -216,6 +214,7 @@ function App() {
       span_freq: manualFreq.span * 1e6,
       rbw: manualFreq.rbw * 1000,
       gain: "auto",
+      audioMode: "fm",
       autoScan: autoScan,
       waterfall: [],
     };
@@ -503,9 +502,6 @@ function SpectrumCard({
   const waterfallCanvasRef = useRef(null);
   const [scanning, setScanning] = useState(false);
   const [lastData, setLastData] = useState(null);
-  const [audioPlaying, setAudioPlaying] = useState(false);
-  const audioPlayer = useAudioPlayer();
-  const socketRef = useRef(null);
   const scanTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -619,11 +615,9 @@ function SpectrumCard({
     const maxP = Math.max(...power);
     const range = maxP - minP || 1;
 
-    // Fondo
     ctx.fillStyle = "#0a0a0a";
     ctx.fillRect(0, 0, w, h);
 
-    // Grid
     ctx.strokeStyle = "#333";
     ctx.lineWidth = 0.5;
     for (let i = 0; i <= 5; i++) {
@@ -633,7 +627,6 @@ function SpectrumCard({
       ctx.stroke();
     }
 
-    // Etiquetas dBm
     ctx.fillStyle = "#666";
     ctx.font = "10px monospace";
     for (let i = 0; i <= 5; i++) {
@@ -641,7 +634,6 @@ function SpectrumCard({
       ctx.fillText(dbm.toFixed(0), 2, (h / 5) * i + 3);
     }
 
-    // Gráfico
     ctx.strokeStyle = "#00ff00";
     ctx.lineWidth = 2;
     ctx.shadowColor = "rgba(0, 255, 0, 0.5)";
@@ -659,7 +651,6 @@ function SpectrumCard({
     });
     ctx.stroke();
 
-    // Info
     ctx.shadowColor = "transparent";
     ctx.fillStyle = "#00ff00";
     ctx.font = "bold 11px monospace";
@@ -714,16 +705,6 @@ function SpectrumCard({
     ctx.putImageData(imageData, 0, 0);
   };
 
-  const handleCenterChange = (e) => {
-    const newCenter = parseFloat(e.target.value) || 0;
-    onUpdate({ center_freq: newCenter * 1e6 });
-  };
-
-  const handleSpanChange = (e) => {
-    const newSpan = parseFloat(e.target.value) || 1;
-    onUpdate({ span_freq: newSpan * 1e6 });
-  };
-
   const handleGainChange = (e) => {
     const gain = e.target.value;
     onUpdate({ gain });
@@ -734,106 +715,6 @@ function SpectrumCard({
       body: JSON.stringify({ gain }),
     }).catch((err) => console.error("Error setting gain:", err));
   };
-
-  const initAudioContext = () => {
-    if (audioContextRef.current) return;
-
-    const audioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
-    audioContextRef.current = audioContext;
-
-    // Crear nodo de ganancia para volumen
-    const gainNode = audioContext.createGain();
-    gainNode.gain.value = audioVolume;
-    gainNode.connect(audioContext.destination);
-
-    sourceNodeRef.current = gainNode;
-  };
-
-  const toggleAudio = async () => {
-    if (audioPlaying) {
-      // Detener audio
-      setAudioPlaying(false);
-      if (socketRef.current) {
-        socketRef.current.emit("stop_audio_stream");
-      }
-    } else {
-      // Iniciar audio
-      audioPlayer.startPlayback();
-      setAudioPlaying(true);
-
-      // Conectar WebSocket para recibir audio
-      setupAudioWebSocket();
-    }
-  };
-
-  const handleVolumeChange = (e) => {
-    const vol = parseFloat(e.target.value);
-    audioPlayer.setAudioVolume(vol);
-  };
-
-  const setupAudioWebSocket = () => {
-    try {
-      // Usar socket.io si está disponible
-      if (typeof io !== "undefined") {
-        const socket = io("http://localhost:5000", {
-          reconnection: true,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000,
-          reconnectionAttempts: 5,
-        });
-
-        socket.on("connect", () => {
-          console.log("✓ Socket.IO conectado para audio");
-
-          // Iniciar streaming de audio
-          socket.emit("start_audio_stream", {
-            start_freq: carrier.center_freq - carrier.span_freq / 2,
-            stop_freq: carrier.center_freq + carrier.span_freq / 2,
-            rbw: carrier.rbw,
-            mode: carrier.audioMode || "fm",
-            bandwidth_khz: 200,
-            interval: 0.1,
-          });
-        });
-
-        socket.on("audio_frame", (data) => {
-          try {
-            // Reproducir audio recibido
-            audioPlayer.playAudioFrame(data.audio, data.sample_rate);
-          } catch (e) {
-            console.error("Error reproduciendo frame:", e);
-          }
-        });
-
-        socket.on("audio_stream_stopped", () => {
-          console.log("Audio stream detenido");
-          setAudioPlaying(false);
-        });
-
-        socket.on("error", (err) => {
-          console.error("Error WebSocket:", err);
-          setAudioPlaying(false);
-        });
-
-        socketRef.current = socket;
-      } else {
-        console.warn("Socket.IO no disponible");
-      }
-    } catch (e) {
-      console.error("Error configurando WebSocket:", e);
-    }
-  };
-
-  // Limpiar socket al desmontar
-  useEffect(() => {
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.emit("stop_audio_stream");
-        socketRef.current.disconnect();
-      }
-    };
-  }, []);
 
   return (
     <div className="spectrum-tile">
@@ -850,7 +731,9 @@ function SpectrumCard({
           <input
             type="number"
             value={(carrier.center_freq / 1e6).toFixed(3)}
-            onChange={handleCenterChange}
+            onChange={(e) =>
+              onUpdate({ center_freq: parseFloat(e.target.value) * 1e6 })
+            }
             className="freq-input"
             step="0.001"
             disabled={serverStatus === "disconnected"}
@@ -862,7 +745,9 @@ function SpectrumCard({
           <input
             type="number"
             value={(carrier.span_freq / 1e6).toFixed(3)}
-            onChange={handleSpanChange}
+            onChange={(e) =>
+              onUpdate({ span_freq: parseFloat(e.target.value) * 1e6 })
+            }
             className="freq-input"
             step="0.001"
             min="0.001"
@@ -897,8 +782,6 @@ function SpectrumCard({
           >
             <option value="fm">FM</option>
             <option value="am">AM</option>
-            <option value="usb">USB</option>
-            <option value="lsb">LSB</option>
           </select>
         </div>
 
@@ -944,35 +827,6 @@ function SpectrumCard({
       >
         {scanning ? "🔄 Escaneando..." : "📊 ESCANEAR"}
       </button>
-
-      <div className="audio-controls">
-        <button
-          onClick={toggleAudio}
-          className={`btn btn-audio ${audioPlaying ? "active" : ""}`}
-          disabled={serverStatus === "disconnected"}
-        >
-          {audioPlaying ? "🔊 Audio ON" : "🔇 Audio OFF"}
-        </button>
-
-        {audioPlaying && (
-          <div className="volume-control">
-            <span>🔉</span>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={audioPlayer.volume}
-              onChange={handleVolumeChange}
-              className="volume-slider"
-              style={{
-                "--value": `${audioPlayer.volume * 100}%`,
-              }}
-            />
-            <span>{Math.round(audioPlayer.volume * 100)}%</span>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
