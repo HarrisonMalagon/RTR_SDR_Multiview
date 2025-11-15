@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 
-// Presets de frecuencias
+// Presets de frecuencias (UTF-8 corregido)
 const FREQUENCY_PRESETS = {
   "FM RADIO": [{ name: "FM Radio", start: 88, stop: 108, rbw: 50 }],
   RADIOCOMUNICACIONES: [
@@ -14,15 +14,22 @@ const FREQUENCY_PRESETS = {
     { name: "ADS-B (1090 MHz)", start: 1090, stop: 1090.5, rbw: 25 },
     { name: "Mode S", start: 1030, stop: 1090, rbw: 100 },
   ],
-  "BANDA CIVIL": [
+  "TDT COLOMBIA": [
+    { name: "MX14 (Caracol)", start: 473, stop: 481, rbw: 50 },
+    { name: "MX15 (RCN)", start: 479, stop: 487, rbw: 50 },
+    { name: "MX16 (Señal Colombia)", start: 485, stop: 493, rbw: 50 },
+    { name: "MX17 (Telecaribe/Antioquia)", start: 491, stop: 499, rbw: 50 },
+    { name: "MX18 (Telepacífico/Telecafé)", start: 497, stop: 505, rbw: 50 },
+    { name: "MX19 (TRO/Teleislas)", start: 503, stop: 511, rbw: 50 },
+    { name: "MX20 (Canal Trece)", start: 509, stop: 517, rbw: 50 },
+    { name: "MX22 (Citytv)", start: 521, stop: 529, rbw: 50 },
+    { name: "MX23 (Canal Capital)", start: 527, stop: 535, rbw: 50 },
+    { name: "MX24 (Cali TV)", start: 533, stop: 541, rbw: 50 },
+  ],
+  CELULAR: [
     { name: "GSM-900 DL", start: 935, stop: 960, rbw: 100 },
     { name: "GSM-1800 DL", start: 1805, stop: 1880, rbw: 100 },
     { name: "4G LTE", start: 800, stop: 2600, rbw: 1000 },
-  ],
-  "TV DIGITAL": [
-    { name: "TDT Multiplex 14", start: 473, stop: 481, rbw: 50 },
-    { name: "TDT Multiplex 15", start: 479, stop: 487, rbw: 50 },
-    { name: "TDT Multiplex 22", start: 521, stop: 529, rbw: 50 },
   ],
   "ISM BANDS": [
     { name: "WiFi 2.4 GHz", start: 2400, stop: 2500, rbw: 1000 },
@@ -31,33 +38,126 @@ const FREQUENCY_PRESETS = {
   ],
 };
 
+// Utility: Downsampling
+const downsampleData = (data, targetLength = 256) => {
+  if (data.length <= targetLength) return data;
+  const step = Math.ceil(data.length / targetLength);
+  const downsampled = [];
+  for (let i = 0; i < data.length; i += step) {
+    downsampled.push(data[i]);
+  }
+  return downsampled.slice(0, targetLength);
+};
+
 function App() {
   const [deviceInfo, setDeviceInfo] = useState(null);
   const [carriers, setCarriers] = useState([]);
   const [autoScan, setAutoScan] = useState(false);
   const [scanInterval, setScanInterval] = useState(2);
+  const [serverStatus, setServerStatus] = useState("connecting");
+  const [statusMessage, setStatusMessage] = useState("Conectando...");
+  const [notification, setNotification] = useState(null);
 
+  // Estado para formulario manual
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualFreq, setManualFreq] = useState({
+    name: "Frecuencia Manual",
+    startFreq: 100,
+    stopFreq: 200,
+    rbw: 50,
+  });
+
+  // Función para mostrar notificaciones
+  const showNotification = (message, type = "info", duration = 3000) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), duration);
+  };
+
+  // Verificar conexión con el servidor
   useEffect(() => {
-    fetch("http://localhost:5000/api/device-info")
-      .then((r) => r.json())
-      .then((data) => setDeviceInfo(data))
-      .catch((e) => console.error(e));
+    const checkServerHealth = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/device-info", {
+          signal: AbortSignal.timeout(3000),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setDeviceInfo(data);
+          setServerStatus("connected");
+          setStatusMessage("Dispositivo listo");
+        }
+      } catch (e) {
+        setServerStatus("disconnected");
+        setStatusMessage("⚠️ Servidor desconectado");
+        console.error("Error conectando:", e);
+      }
+    };
+
+    checkServerHealth();
+    const interval = setInterval(checkServerHealth, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const addFrequency = (preset) => {
-    setCarriers([
-      ...carriers,
-      {
-        id: Date.now(),
-        name: preset.name,
-        start_freq: preset.start * 1e6,
-        stop_freq: preset.stop * 1e6,
-        rbw: preset.rbw * 1000,
-        gain: "auto",
-        autoScan: false,
-        waterfall: [],
-      },
-    ]);
+    const newCarrier = {
+      id: Date.now(),
+      name: preset.name,
+      start_freq: preset.start * 1e6,
+      stop_freq: preset.stop * 1e6,
+      rbw: preset.rbw * 1000,
+      gain: "auto",
+      autoScan: autoScan,
+      waterfall: [],
+    };
+    setCarriers([...carriers, newCarrier]);
+    showNotification(`📡 ${preset.name} agregado`, "success");
+  };
+
+  const addManualFrequency = () => {
+    // Validaciones
+    if (!manualFreq.name.trim()) {
+      showNotification("⚠️ Ingresa un nombre", "error");
+      return;
+    }
+
+    if (manualFreq.startFreq >= manualFreq.stopFreq) {
+      showNotification("⚠️ Start debe ser menor que Stop", "error");
+      return;
+    }
+
+    if (manualFreq.rbw <= 0) {
+      showNotification("⚠️ RBW debe ser positivo", "error");
+      return;
+    }
+
+    const span = manualFreq.stopFreq - manualFreq.startFreq;
+    if (span < manualFreq.rbw) {
+      showNotification("⚠️ Span debe ser mayor que RBW", "error");
+      return;
+    }
+
+    const newCarrier = {
+      id: Date.now(),
+      name: manualFreq.name,
+      start_freq: manualFreq.startFreq * 1e6,
+      stop_freq: manualFreq.stopFreq * 1e6,
+      rbw: manualFreq.rbw * 1000,
+      gain: "auto",
+      autoScan: autoScan,
+      waterfall: [],
+    };
+
+    setCarriers([...carriers, newCarrier]);
+    showNotification(`📡 ${manualFreq.name} agregado`, "success");
+    setShowManualForm(false);
+
+    // Reset form
+    setManualFreq({
+      name: "Frecuencia Manual",
+      startFreq: 100,
+      stopFreq: 200,
+      rbw: 50,
+    });
   };
 
   const removeCarrier = (id) => {
@@ -70,16 +170,35 @@ function App() {
 
   return (
     <div className="app">
+      {/* Notificación flotante */}
+      {notification && (
+        <div className={`notification notification-${notification.type}`}>
+          {notification.message}
+        </div>
+      )}
+
       <header className="app-header">
         <h1>📡 RTL-SDR Spectrum Analyzer Pro</h1>
-        {deviceInfo && (
-          <p className="device-status">
-            <span style={{ color: deviceInfo.is_real ? "#00ff00" : "#ff6b00" }}>
-              {deviceInfo.is_real ? "✓ DISPOSITIVO REAL" : "🔄 SIMULACION"}
-            </span>{" "}
-            | {deviceInfo.device} | {deviceInfo.tuner}
+        <div className="header-info">
+          {deviceInfo && (
+            <p className="device-status">
+              <span
+                className={`status-indicator ${
+                  deviceInfo.is_real ? "real" : "simulated"
+                }`}
+              >
+                {deviceInfo.is_real ? "✓ DISPOSITIVO REAL" : "🔄 SIMULACIÓN"}
+              </span>
+              <span className="divider">|</span>
+              <span>{deviceInfo.device}</span>
+              <span className="divider">|</span>
+              <span>{deviceInfo.tuner}</span>
+            </p>
+          )}
+          <p className={`server-status status-${serverStatus}`}>
+            {statusMessage}
           </p>
-        )}
+        </div>
       </header>
 
       <div className="main-container">
@@ -90,6 +209,7 @@ function App() {
               type="checkbox"
               checked={autoScan}
               onChange={(e) => setAutoScan(e.target.checked)}
+              disabled={serverStatus === "disconnected"}
             />
             Activar
           </label>
@@ -111,6 +231,109 @@ function App() {
 
           <hr />
 
+          {/* Botón para abrir formulario manual */}
+          <button
+            onClick={() => setShowManualForm(!showManualForm)}
+            className="btn btn-manual-toggle"
+            disabled={serverStatus === "disconnected"}
+          >
+            {showManualForm ? "✕ Cerrar Manual" : "➕ Frecuencia Manual"}
+          </button>
+
+          {/* Formulario manual */}
+          {showManualForm && (
+            <div className="manual-form">
+              <h4>Rango Personalizado</h4>
+
+              <label>
+                Nombre:
+                <input
+                  type="text"
+                  value={manualFreq.name}
+                  onChange={(e) =>
+                    setManualFreq({ ...manualFreq, name: e.target.value })
+                  }
+                  className="form-input"
+                  placeholder="Mi escaneo"
+                />
+              </label>
+
+              <label>
+                Inicio (MHz):
+                <input
+                  type="number"
+                  value={manualFreq.startFreq}
+                  onChange={(e) =>
+                    setManualFreq({
+                      ...manualFreq,
+                      startFreq: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className="form-input"
+                  step="0.1"
+                />
+              </label>
+
+              <label>
+                Fin (MHz):
+                <input
+                  type="number"
+                  value={manualFreq.stopFreq}
+                  onChange={(e) =>
+                    setManualFreq({
+                      ...manualFreq,
+                      stopFreq: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className="form-input"
+                  step="0.1"
+                />
+              </label>
+
+              <label>
+                RBW (kHz):
+                <input
+                  type="number"
+                  value={manualFreq.rbw}
+                  onChange={(e) =>
+                    setManualFreq({
+                      ...manualFreq,
+                      rbw: parseFloat(e.target.value) || 50,
+                    })
+                  }
+                  className="form-input"
+                  step="10"
+                  min="10"
+                />
+              </label>
+
+              <div className="form-info">
+                <p>
+                  <strong>Span:</strong>{" "}
+                  {(manualFreq.stopFreq - manualFreq.startFreq).toFixed(1)} MHz
+                </p>
+                <p>
+                  <strong>Puntos:</strong> ~
+                  {Math.ceil(
+                    ((manualFreq.stopFreq - manualFreq.startFreq) * 1000) /
+                      manualFreq.rbw
+                  )}
+                </p>
+              </div>
+
+              <button
+                onClick={addManualFrequency}
+                className="btn btn-success"
+                style={{ width: "100%", marginTop: "10px" }}
+                disabled={serverStatus === "disconnected"}
+              >
+                ✓ Agregar Escaneo
+              </button>
+            </div>
+          )}
+
+          <hr />
+
           <h3>📻 Presets de Frecuencia</h3>
           <div className="presets-container">
             {Object.entries(FREQUENCY_PRESETS).map(([category, presets]) => (
@@ -122,6 +345,7 @@ function App() {
                     onClick={() => addFrequency(preset)}
                     className="btn btn-preset"
                     title={`${preset.start} - ${preset.stop} MHz`}
+                    disabled={serverStatus === "disconnected"}
                   >
                     {preset.name}
                   </button>
@@ -157,10 +381,10 @@ function App() {
         <main className="main-content">
           {carriers.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-icon">📭</div>
+              <div className="empty-icon">🔭</div>
               <h2>No hay portadoras activas</h2>
               <p>
-                Selecciona un preset de frecuencia o crea una portadora manual
+                Selecciona un preset o crea una frecuencia manual en el panel
               </p>
             </div>
           ) : (
@@ -173,6 +397,7 @@ function App() {
                   onUpdate={(updates) => updateCarrier(c.id, updates)}
                   autoScan={autoScan}
                   scanInterval={scanInterval}
+                  serverStatus={serverStatus}
                 />
               ))}
             </div>
@@ -183,7 +408,14 @@ function App() {
   );
 }
 
-function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
+function SpectrumCard({
+  carrier,
+  onRemove,
+  onUpdate,
+  autoScan,
+  scanInterval,
+  serverStatus,
+}) {
   const canvasRef = useRef(null);
   const waterfallCanvasRef = useRef(null);
   const [scanning, setScanning] = useState(false);
@@ -192,7 +424,7 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
 
   // Escaneo automático
   useEffect(() => {
-    if (!autoScan) return;
+    if (!autoScan || serverStatus === "disconnected") return;
 
     const performScan = async () => {
       setScanning(true);
@@ -206,16 +438,21 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
             rbw: carrier.rbw,
             num_averages: 1,
           }),
+          signal: AbortSignal.timeout(5000),
         });
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         setLastData(data);
 
-        // Agregar al waterfall
+        const downsampledPower = downsampleData(data.power, 256);
         onUpdate({
-          waterfall: [...(carrier.waterfall || []), data.power].slice(-100),
+          waterfall: [...(carrier.waterfall || []), downsampledPower].slice(
+            -50
+          ),
         });
       } catch (e) {
-        console.error("Error:", e);
+        console.error("Error escaneo:", e);
       } finally {
         setScanning(false);
       }
@@ -232,6 +469,7 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
     carrier.rbw,
     scanInterval,
     onUpdate,
+    serverStatus,
   ]);
 
   const handleScan = async () => {
@@ -246,11 +484,16 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
           rbw: carrier.rbw,
           num_averages: 2,
         }),
+        signal: AbortSignal.timeout(5000),
       });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setLastData(data);
+
+      const downsampledPower = downsampleData(data.power, 256);
       onUpdate({
-        waterfall: [...(carrier.waterfall || []), data.power].slice(-100),
+        waterfall: [...(carrier.waterfall || []), downsampledPower].slice(-50),
       });
     } catch (e) {
       console.error("Error:", e);
@@ -259,16 +502,14 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
     }
   };
 
-  // Dibujar espectro
   useEffect(() => {
     if (!lastData) return;
     drawSpectrum();
   }, [lastData]);
 
-  // Dibujar waterfall
   useEffect(() => {
     if (!carrier.waterfall || carrier.waterfall.length === 0) return;
-    drawWaterfall();
+    drawWaterfallOptimized();
   }, [carrier.waterfall]);
 
   const drawSpectrum = () => {
@@ -282,16 +523,14 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
     canvas.width = w;
     canvas.height = h;
 
-    const power = lastData.power;
+    const power = downsampleData(lastData.power, 256);
     const minP = Math.min(...power);
     const maxP = Math.max(...power);
     const range = maxP - minP || 1;
 
-    // Fondo
     ctx.fillStyle = "#0a0a0a";
     ctx.fillRect(0, 0, w, h);
 
-    // Grid
     ctx.strokeStyle = "#333";
     ctx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
@@ -301,23 +540,22 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
       ctx.stroke();
     }
 
-    // Gráfico
     ctx.strokeStyle = "#00ff00";
     ctx.lineWidth = 2;
     ctx.shadowColor = "rgba(0, 255, 0, 0.5)";
     ctx.shadowBlur = 10;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
     ctx.beginPath();
 
     power.forEach((p, i) => {
       const x = (i / (power.length - 1)) * w;
       const y = h - ((p - minP) / range) * h * 0.9;
-
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
     ctx.stroke();
 
-    // Texto
     ctx.shadowColor = "transparent";
     ctx.fillStyle = "#00ff00";
     ctx.font = "bold 12px monospace";
@@ -325,7 +563,7 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
     ctx.fillText(`${(lastData.max_freq / 1e6).toFixed(3)} MHz`, 10, 35);
   };
 
-  const drawWaterfall = () => {
+  const drawWaterfallOptimized = () => {
     if (!waterfallCanvasRef.current) return;
 
     const canvas = waterfallCanvasRef.current;
@@ -338,6 +576,9 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
 
     if (!carrier.waterfall || carrier.waterfall.length === 0) return;
 
+    const imageData = ctx.createImageData(w, h);
+    const data = imageData.data;
+
     const pixelPerRow = h / carrier.waterfall.length;
 
     carrier.waterfall.forEach((powerData, rowIdx) => {
@@ -345,24 +586,58 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
       const maxP = Math.max(...powerData);
       const range = maxP - minP || 1;
 
-      powerData.forEach((p, colIdx) => {
-        const x = (colIdx / (powerData.length - 1)) * w;
-        const y = rowIdx * pixelPerRow;
+      const colWidth = w / powerData.length;
 
-        // Colorizar por potencia
+      powerData.forEach((p, colIdx) => {
         const normalized = (p - minP) / range;
-        let hue = normalized * 120; // Verde a rojo
-        ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
-        ctx.fillRect(x, y, w / powerData.length, pixelPerRow);
+        const hue = normalized * 120;
+
+        const rgb = hslToRgb(hue / 360, 1, 0.5);
+
+        for (let py = 0; py < pixelPerRow; py++) {
+          for (let px = 0; px < colWidth; px++) {
+            const idx =
+              ((rowIdx * pixelPerRow + py) * w + colIdx * colWidth + px) * 4;
+            if (idx < data.length) {
+              data[idx] = rgb[0];
+              data[idx + 1] = rgb[1];
+              data[idx + 2] = rgb[2];
+              data[idx + 3] = 255;
+            }
+          }
+        }
       });
     });
+
+    ctx.putImageData(imageData, 0, 0);
+  };
+
+  const hslToRgb = (h, s, l) => {
+    let r, g, b;
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      const hue2rgb = (p, q, t) => {
+        if (t < 0) t += 1;
+        if (t > 1) t -= 1;
+        if (t < 1 / 6) return p + (q - p) * 6 * t;
+        if (t < 1 / 2) return q;
+        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+        return p;
+      };
+      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
   };
 
   const handleGainChange = (e) => {
     const gain = e.target.value;
     onUpdate({ gain });
 
-    // Enviar al backend
     fetch("http://localhost:5000/api/set-gain", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -392,6 +667,7 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
             value={carrier.gain}
             onChange={handleGainChange}
             className="gain-select"
+            disabled={serverStatus === "disconnected"}
           >
             <option value="auto">Auto</option>
             <option value="0">0 dB</option>
@@ -407,6 +683,7 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
             type="checkbox"
             checked={carrier.autoScan}
             onChange={(e) => onUpdate({ autoScan: e.target.checked })}
+            disabled={serverStatus === "disconnected"}
           />
           Auto
         </label>
@@ -442,7 +719,7 @@ function SpectrumCard({ carrier, onRemove, onUpdate, autoScan, scanInterval }) {
 
       <button
         onClick={handleScan}
-        disabled={scanning}
+        disabled={scanning || serverStatus === "disconnected"}
         className={`btn btn-scan ${scanning ? "scanning" : ""}`}
       >
         {scanning ? "🔄 Escaneando..." : "📊 ESCANEAR AHORA"}
