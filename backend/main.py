@@ -23,9 +23,6 @@ from utils.logger import setup_logging
 logger = setup_logging()
 
 def main():
-    """Función principal"""
-    socketio = None
-    app = None
     scanner = None
     
     try:
@@ -33,7 +30,7 @@ def main():
         logger.info("Iniciando RTL-SDR Multiview Analyzer")
         logger.info("=" * 70)
         
-        # Crear y inicializar scanner
+        # 1. Primero el scanner
         logger.info("Inicializando SDR Scanner...")
         scanner = SDRScanner()
         device_info = scanner.get_device_info()
@@ -41,16 +38,20 @@ def main():
         logger.info(f"   Tuner: {device_info.get('tuner', 'Unknown')}")
         logger.info(f"   Real: {device_info.get('is_real', False)}")
         
-        # Crear aplicación Flask
+        # 2. Luego la app (que incluye SocketIO)
         logger.info("Creando aplicacion Flask...")
-        app, socketio = create_app()
+        app, socketio = create_app()  # Esto debería crear SocketIO con CORS
         
-        # Pasar scanner a la API
+        # 3. Configurar dependencias
         set_scanner(scanner)
+        
+        # Inicializar handler de audio
+        from app.services.audio_handler import AudioHandler
+        audio_handler = AudioHandler()
         
         # Inicializar WebSocket
         from app.websocket_handler import init_socketio
-        init_socketio(socketio, scanner)
+        init_socketio(socketio, scanner, audio_handler)
         
         # Configuración del servidor
         host = os.getenv("FLASK_HOST", "127.0.0.1")
