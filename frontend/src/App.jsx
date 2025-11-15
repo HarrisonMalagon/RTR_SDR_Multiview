@@ -1,16 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 
-// Paletas de colores para waterfall
+// Paletas de colores
 const COLOR_PALETTES = {
   default: { name: "Default (Verde-Rojo)", id: "default" },
   viridis: { name: "Viridis", id: "viridis" },
   jet: { name: "Jet", id: "jet" },
-  thermal: { name: "Thermal (Rojo-Blanco)", id: "thermal" },
+  thermal: { name: "Thermal", id: "thermal" },
   grayscale: { name: "Escala de Grises", id: "grayscale" },
 };
 
-// Presets de frecuencias
 const FREQUENCY_PRESETS = {
   "FM RADIO": [{ name: "FM Radio", center: 98, span: 40, rbw: 50 }],
   RADIOCOMUNICACIONES: [
@@ -36,7 +35,6 @@ const FREQUENCY_PRESETS = {
   ],
 };
 
-// Downsampling
 const downsampleData = (data, targetLength = 512) => {
   if (data.length <= targetLength) return data;
   const step = Math.ceil(data.length / targetLength);
@@ -47,7 +45,6 @@ const downsampleData = (data, targetLength = 512) => {
   return downsampled.slice(0, targetLength);
 };
 
-// Funciones de color
 const getColorFromValue = (normalized, palette = "default") => {
   normalized = Math.max(0, Math.min(1, normalized));
   switch (palette) {
@@ -190,20 +187,13 @@ function App() {
   };
 
   const addManualFrequency = () => {
-    if (!manualFreq.name.trim()) {
-      showNotification("⚠️ Ingresa un nombre", "error");
-      return;
-    }
-    if (manualFreq.span <= 0) {
-      showNotification("⚠️ Span debe ser positivo", "error");
-      return;
-    }
-    if (manualFreq.rbw <= 0) {
-      showNotification("⚠️ RBW debe ser positivo", "error");
-      return;
-    }
-    if (manualFreq.span < manualFreq.rbw) {
-      showNotification("⚠️ Span debe ser mayor que RBW", "error");
+    if (
+      !manualFreq.name.trim() ||
+      manualFreq.span <= 0 ||
+      manualFreq.rbw <= 0 ||
+      manualFreq.span < manualFreq.rbw
+    ) {
+      showNotification("⚠️ Verifica los valores", "error");
       return;
     }
 
@@ -222,12 +212,7 @@ function App() {
     setCarriers([...carriers, newCarrier]);
     showNotification(`📡 ${manualFreq.name} agregado`, "success");
     setShowManualForm(false);
-    setManualFreq({
-      name: "Escaneo Manual",
-      center: 100,
-      span: 20,
-      rbw: 50,
-    });
+    setManualFreq({ name: "Escaneo Manual", center: 100, span: 20, rbw: 50 });
   };
 
   const removeCarrier = (id) => {
@@ -274,7 +259,6 @@ function App() {
         <aside className="sidebar">
           <div className="sidebar-scroll">
             <h3>⚙️ Control</h3>
-
             <label className="auto-scan-label">
               <input
                 type="checkbox"
@@ -328,7 +312,6 @@ function App() {
             {showManualForm && (
               <div className="manual-form">
                 <h4>Frecuencia Personalizada</h4>
-
                 <label>
                   Nombre:
                   <input
@@ -340,7 +323,6 @@ function App() {
                     className="form-input"
                   />
                 </label>
-
                 <label>
                   Centro (MHz):
                   <input
@@ -356,7 +338,6 @@ function App() {
                     step="0.1"
                   />
                 </label>
-
                 <label>
                   Span (MHz):
                   <input
@@ -373,7 +354,6 @@ function App() {
                     min="0.001"
                   />
                 </label>
-
                 <label>
                   RBW (kHz):
                   <input
@@ -390,7 +370,6 @@ function App() {
                     min="10"
                   />
                 </label>
-
                 <div className="form-info">
                   <p>
                     <strong>Start:</strong>{" "}
@@ -401,7 +380,6 @@ function App() {
                     {(manualFreq.center + manualFreq.span / 2).toFixed(3)} MHz
                   </p>
                 </div>
-
                 <button
                   onClick={addManualFrequency}
                   className="btn btn-success"
@@ -502,6 +480,8 @@ function SpectrumCard({
   const waterfallCanvasRef = useRef(null);
   const [scanning, setScanning] = useState(false);
   const [lastData, setLastData] = useState(null);
+  const [audioPlaying, setAudioPlaying] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.5);
   const scanTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -645,7 +625,6 @@ function SpectrumCard({
     power.forEach((p, i) => {
       const x = (i / (power.length - 1)) * w;
       const y = h - ((p - minP) / range) * h;
-
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
@@ -708,7 +687,6 @@ function SpectrumCard({
   const handleGainChange = (e) => {
     const gain = e.target.value;
     onUpdate({ gain });
-
     fetch("http://localhost:5000/api/set-gain", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -827,6 +805,33 @@ function SpectrumCard({
       >
         {scanning ? "🔄 Escaneando..." : "📊 ESCANEAR"}
       </button>
+
+      <div className="audio-controls">
+        <button
+          onClick={() => setAudioPlaying(!audioPlaying)}
+          className={`btn btn-audio ${audioPlaying ? "active" : ""}`}
+          disabled={serverStatus === "disconnected"}
+        >
+          {audioPlaying ? "🔊 Audio ON" : "🔇 Audio OFF"}
+        </button>
+
+        {audioPlaying && (
+          <div className="volume-control">
+            <span>🔉</span>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={audioVolume}
+              onChange={(e) => setAudioVolume(parseFloat(e.target.value))}
+              className="volume-slider"
+              style={{ "--value": `${audioVolume * 100}%` }}
+            />
+            <span>{Math.round(audioVolume * 100)}%</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,15 +1,18 @@
 """
 Wrapper para usar RTL-SDR real o simulado
+CON CAPACIDAD DE CAPTURAR MUESTRAS IQ DIRECTAS
 """
 
 import logging
 import os
 import sys
+import numpy as np
+import time
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# ✅ ESTABLECER PATH ANTES DE IMPORTAR
+# ESTABLECER PATH ANTES DE IMPORTAR
 lib_path = Path(__file__).parent.parent.parent / 'lib'
 if lib_path.exists():
     lib_str = str(lib_path.absolute())
@@ -35,13 +38,86 @@ class RTLSDRWrapper:
             self.device = dev
             self.is_real = True
             self.tuner_type = dev.get_tuner_type()
-            logger.info(f"✓✓✓ RTL-SDR REAL CONECTADO: {self.tuner_type} ✓✓✓")
+            logger.info(f"[OK] RTL-SDR REAL CONECTADO: {self.tuner_type}")
             return True
             
         except Exception as e:
             logger.warning(f"No se pudo conectar: {e}")
             self.is_real = False
             return False
+    
+    def get_iq_samples(self, center_freq, span, num_samples=8192):
+        """
+        Obtiene muestras IQ directas del dispositivo
+        
+        Args:
+            center_freq: Frecuencia central en Hz
+            span: Ancho de banda en Hz
+            num_samples: Numero de muestras a capturar
+            
+        Returns:
+            Array de muestras IQ complejas
+        """
+        if not self.is_real or not self.device:
+            logger.warning("IQ directo no disponible en modo simulacion")
+            return None
+            
+        try:
+            # Configurar dispositivo
+            self.device.center_freq = int(center_freq)
+            self.device.sample_rate = int(2.4e6)
+            self.device.gain = 'auto'
+            time.sleep(0.05)
+            
+            # Capturar muestras IQ
+            samples = self.device.read_samples(num_samples)
+            
+            logger.info(f"Muestras IQ capturadas: {len(samples)}")
+            return np.array(samples, dtype=np.complex64)
+            
+        except Exception as e:
+            logger.error(f"Error capturando IQ: {e}")
+            return None
+    
+    def capture_continuous(self, center_freq, ring_buffer, duration=None):
+        """
+        Captura continua de IQ al ring buffer
+        
+        Args:
+            center_freq: Frecuencia central
+            ring_buffer: RingBuffer instance
+            duration: Duracion en segundos (None = infinito)
+        """
+        if not self.is_real or not self.device:
+            logger.error("Captura continua requiere dispositivo real")
+            return
+        
+        try:
+            self.device.center_freq = int(center_freq)
+            self.device.sample_rate = int(2.4e6)
+            self.device.gain = 'auto'
+            time.sleep(0.05)
+            
+            chunk_size = 65536
+            start_time = time.time()
+            
+            while True:
+                if duration and (time.time() - start_time) > duration:
+                    break
+                
+                try:
+                    samples = self.device.read_samples(chunk_size)
+                    written = ring_buffer.write(np.array(samples, dtype=np.complex64))
+                    
+                    if written < len(samples):
+                        logger.warning(f"Buffer lleno: perdidas detectadas")
+                        
+                except Exception as e:
+                    logger.error(f"Error en captura: {e}")
+                    break
+        
+        except Exception as e:
+            logger.error(f"Error en captura continua: {e}")
     
     def scan_frequency_range(self, start_freq, stop_freq, rbw=100000, num_averages=2):
         """Escanea - real o simulado"""
@@ -54,8 +130,6 @@ class RTLSDRWrapper:
     def _scan_real(self, start_freq, stop_freq, rbw, num_averages):
         """Escaneo real"""
         try:
-            import numpy as np
-            import time
             from scipy import signal
             
             center = int((start_freq + stop_freq) / 2)
@@ -90,7 +164,7 @@ class RTLSDRWrapper:
             freq_f = freq[mask]
             power_f = power_avg[mask]
             
-            max_idx = np.argmax(power_f)
+            max_idx = np.argmax(power_f) if len(power_f) > 0 else 0
             
             return {
                 'start_freq': float(start_freq),
@@ -98,13 +172,13 @@ class RTLSDRWrapper:
                 'center_freq': float(center),
                 'frequencies': freq_f.tolist(),
                 'power': power_f.tolist(),
-                'max_power': float(power_f[max_idx]),
-                'max_freq': float(freq_f[max_idx]),
+                'max_power': float(power_f[max_idx]) if len(power_f) > 0 else -100,
+                'max_freq': float(freq_f[max_idx]) if len(power_f) > 0 else center,
                 'timestamp': time.time(),
                 'rbw': rbw,
                 'num_points': num_points,
                 'carriers_found': [],
-                'noise_floor': float(np.percentile(power_f, 20)),
+                'noise_floor': float(np.percentile(power_f, 20)) if len(power_f) > 0 else -90,
                 'is_real': True
             }
             
@@ -114,9 +188,6 @@ class RTLSDRWrapper:
     
     def _scan_simulated(self, start_freq, stop_freq, rbw, num_averages):
         """Escaneo simulado"""
-        import numpy as np
-        import time
-        
         span = stop_freq - start_freq
         num_points = max(512, min(1024, int(span / rbw)))
         freq = np.linspace(start_freq, stop_freq, num_points)
@@ -124,7 +195,7 @@ class RTLSDRWrapper:
         noise = -90 + np.random.normal(0, 2, num_points)
         power = np.copy(noise)
         
-        # Portadoras
+        # Portadoras simuladas
         for i in range(3):
             c_freq = start_freq + span * (0.2 + i * 0.3)
             distance = np.abs(freq - c_freq)
@@ -150,7 +221,7 @@ class RTLSDRWrapper:
         }
     
     def get_device_info(self):
-        """Información del dispositivo"""
+        """Informacion del dispositivo"""
         status = "DISPOSITIVO REAL" if self.is_real else "SIMULACION"
         return {
             'status': 'connected',
