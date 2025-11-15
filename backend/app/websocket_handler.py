@@ -389,6 +389,8 @@ def init_socketio(socketio, scanner, sdr_manager, audio_handler=None):
     logger.info("Heartbeat monitor iniciado")
 
 
+
+
 def create_iq_from_spectrum(frequencies, power):
     """
     Crea muestras IQ sintetizadas desde espectro
